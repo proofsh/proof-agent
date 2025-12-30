@@ -19,8 +19,8 @@ export type TUIOptions = {
   initialPrompt?: string;
   /** Working directory for the agent */
   workingDirectory?: string;
-  /** Custom agent options passed  */
-  agentOptions: TUIAgentCallOptions;
+  /** Custom agent options (defaults provided if not specified) */
+  agentOptions?: TUIAgentCallOptions;
   /** Header configuration */
   header?: {
     name?: string;

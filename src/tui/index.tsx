@@ -2,38 +2,39 @@ import React from "react";
 import { render } from "ink";
 import { App } from "./app.js";
 import { ChatProvider } from "./chat-context.js";
-import type { TUIAgent, TUIOptions } from "./types.js";
+import { tuiAgent, tuiAgentModelId, createDefaultAgentOptions } from "./config.js";
+import type { TUIOptions } from "./types.js";
 
 export type { TUIOptions, AutoAcceptMode } from "./types.js";
 export { useChatContext, ChatProvider } from "./chat-context.js";
+export { tuiAgent, tuiAgentModelId, createDefaultAgentOptions } from "./config.js";
 
 /**
- * Create a Claude Code-style TUI for any ToolLoopAgent.
+ * Create a Claude Code-style TUI.
+ *
+ * The agent is configured in `config.ts` - this is the single source of truth.
  *
  * @example
  * ```ts
  * import { createTUI } from './tui';
- * import { myAgent } from './agent';
  *
- * // Interactive REPL mode
- * await createTUI(myAgent);
+ * // Interactive mode
+ * await createTUI({ workingDirectory: process.cwd() });
  *
  * // One-shot mode with initial prompt
- * await createTUI(myAgent, {
+ * await createTUI({
  *   initialPrompt: "Explain this codebase",
- *   agentOptions: { workingDirectory: process.cwd() }
+ *   workingDirectory: process.cwd(),
  * });
  * ```
  */
-export async function createTUI(
-  agent: TUIAgent,
-  options: TUIOptions,
-): Promise<void> {
+export async function createTUI(options: TUIOptions): Promise<void> {
+  const agentOptions = options.agentOptions ?? createDefaultAgentOptions(options.workingDirectory ?? process.cwd());
+
   const { waitUntilExit } = render(
     <ChatProvider
-      agent={agent}
-      agentOptions={options.agentOptions}
-      model={options.header?.model}
+      agentOptions={agentOptions}
+      model={options.header?.model ?? tuiAgentModelId}
       workingDirectory={options.workingDirectory}
     >
       <App options={options} />
@@ -47,12 +48,13 @@ export async function createTUI(
  * Render the TUI without waiting for exit.
  * Useful for programmatic control.
  */
-export function renderTUI(agent: TUIAgent, options: TUIOptions) {
+export function renderTUI(options: TUIOptions) {
+  const agentOptions = options.agentOptions ?? createDefaultAgentOptions(options.workingDirectory ?? process.cwd());
+
   return render(
     <ChatProvider
-      agent={agent}
-      agentOptions={options.agentOptions}
-      model={options.header?.model}
+      agentOptions={agentOptions}
+      model={options.header?.model ?? tuiAgentModelId}
       workingDirectory={options.workingDirectory}
     >
       <App options={options} />

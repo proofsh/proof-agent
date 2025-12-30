@@ -1,4 +1,15 @@
-import { deepAgent } from "../agent";
+import { deepAgent, deepAgentModelId } from "../agent/deep-agent";
+import type { ScratchpadEntry, TodoItem } from "../agent/types";
 
-// set here!
+// Configure your agent here - this is the single source of truth for the TUI
 export const tuiAgent = deepAgent;
+export const tuiAgentModelId = deepAgentModelId;
+
+// Default agent options factory
+export function createDefaultAgentOptions(workingDirectory: string) {
+  return {
+    workingDirectory,
+    todos: [] as TodoItem[],
+    scratchpad: new Map<string, ScratchpadEntry>(),
+  };
+}

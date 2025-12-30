@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-import { deepAgentModelId } from "../agent/deep-agent.js";
-import { deepAgent } from "../agent/index.js";
 import { createTUI } from "../tui/index.js";
 
 async function main() {
@@ -33,18 +31,12 @@ async function main() {
   }
 
   try {
-    await createTUI(deepAgent, {
+    await createTUI({
       initialPrompt,
       workingDirectory,
-      agentOptions: {
-        workingDirectory,
-        todos: [],
-        scratchpad: new Map(),
-      },
       header: {
         name: "Open Claude Code",
         version: "0.1.0",
-        model: deepAgentModelId,
       },
     });
   } catch (error) {

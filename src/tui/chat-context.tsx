@@ -12,8 +12,8 @@ import {
 } from "ai";
 import { Chat } from "@ai-sdk/react";
 import { createAgentTransport } from "./transport.js";
+import { tuiAgent } from "./config.js";
 import type {
-  TUIAgent,
   TUIAgentCallOptions,
   TUIAgentUIMessage,
   AutoAcceptMode,
@@ -42,7 +42,6 @@ const AUTO_ACCEPT_MODES: AutoAcceptMode[] = ["off", "edits", "all"];
 
 type ChatProviderProps = {
   children: ReactNode;
-  agent: TUIAgent;
   agentOptions: TUIAgentCallOptions;
   model?: string;
   workingDirectory?: string;
@@ -95,7 +94,6 @@ function accumulateUsage(
 
 export function ChatProvider({
   children,
-  agent,
   agentOptions,
   model,
   workingDirectory,
@@ -115,11 +113,11 @@ export function ChatProvider({
   const transport = useMemo(
     () =>
       createAgentTransport({
-        agent,
+        agent: tuiAgent,
         agentOptions,
         onUsageUpdate: handleUsageUpdate,
       }),
-    [agent, agentOptions, handleUsageUpdate],
+    [agentOptions, handleUsageUpdate],
   );
 
   const chat = useMemo(
