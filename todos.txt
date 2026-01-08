@@ -39,6 +39,7 @@ sandbox related:
 - [ ] add timeout related info to interface
 - [ ] add command to ssh into sandbox!
 - [ ] update suggestions (tui) to show files in sandbox
+- [ ] always start agent in auto accept mode if using sandbox
 
 ---
 
