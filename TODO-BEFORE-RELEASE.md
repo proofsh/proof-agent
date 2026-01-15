@@ -34,6 +34,7 @@
   - Changing context compaction approach (auto compaction vs open code approach)
 - [ ] Stop execution when user leaves no reason in tool execution approval (instead of continuing)
 - [ ] Persist chats for resume capability
+- [ ] Client-side pending approval rule propagation: When the model generates multiple approval requests in the same batch (e.g., two file edits in the same directory), approving the first one with a rule should apply to remaining pending approvals in that batch, not just follow-up requests
 
 ### Architecture
 - [ ] Evaluate whether TUI package should remain separate or be merged into CLI app
