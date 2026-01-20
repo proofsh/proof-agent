@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
 import { defaultModelLabel } from "@open-harness/agent";
-import { createTUI } from "@open-harness/tui";
+import {
+  createTUI,
+  loadSettings,
+  saveSettings,
+  fetchAvailableModels,
+  type Settings,
+} from "@open-harness/tui";
 import { loadAgentsMd } from "./agents-md";
 import { onCleanup, cleanup } from "./cleanup-handler";
 import {
@@ -129,6 +135,19 @@ async function main() {
     // Load agents.md files from the working directory hierarchy
     const agentsMd = await loadAgentsMd(workingDirectory);
 
+    // Load user settings and available models in parallel
+    const [settings, availableModels] = await Promise.all([
+      loadSettings(),
+      fetchAvailableModels(),
+    ]);
+
+    // Callback to save settings when they change
+    const handleSettingsChange = (newSettings: Settings) => {
+      saveSettings(newSettings).catch((err) => {
+        console.error("Failed to save settings:", err);
+      });
+    };
+
     await createTUI({
       initialPrompt: parsed.initialPrompt,
       workingDirectory: sandbox.workingDirectory,
@@ -148,6 +167,9 @@ async function main() {
           customInstructions: agentsMd.content,
         }),
       },
+      initialSettings: settings,
+      onSettingsChange: handleSettingsChange,
+      availableModels,
       // Auto-accept all tools in sandbox mode since it's an isolated environment
       ...(isRemoteSandbox && { initialAutoAcceptMode: "all" }),
     });

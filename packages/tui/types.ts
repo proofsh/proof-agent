@@ -7,6 +7,8 @@ import type {
 } from "ai";
 import type { Sandbox } from "@open-harness/sandbox";
 import type { tuiAgent } from "./config";
+import type { Settings } from "./lib/settings";
+import type { ModelInfo } from "./lib/models";
 
 export type TUIAgent = typeof tuiAgent;
 export type TUIAgentCallOptions = Parameters<
@@ -35,6 +37,9 @@ export type AutoAcceptMode = "off" | "edits" | "all";
 // Re-export ApprovalRule for client-side use
 export type { ApprovalRule } from "@open-harness/agent";
 
+// Re-export for external use (already imported above for TUIOptions)
+export type { Settings, ModelInfo };
+
 export type TUIOptions = {
   /** Initial prompt to run (for one-shot mode) */
   initialPrompt?: string;
@@ -52,4 +57,10 @@ export type TUIOptions = {
   };
   /** Initial auto-accept mode (defaults to "off") */
   initialAutoAcceptMode?: AutoAcceptMode;
+  /** Initial settings (loaded from config file) */
+  initialSettings?: Settings;
+  /** Callback when settings change (for persistence) */
+  onSettingsChange?: (settings: Settings) => void;
+  /** Available models for model selection (fetched from gateway) */
+  availableModels?: ModelInfo[];
 };
