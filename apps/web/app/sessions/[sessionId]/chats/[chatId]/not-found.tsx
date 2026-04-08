@@ -18,8 +18,8 @@ export default function ChatNotFound() {
         <MessageSquarePlus className="h-10 w-10 text-muted-foreground/50" />
         <h2 className="text-lg font-medium">Chat not found</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
-          This chat may have been deleted or doesn&apos;t exist. Start a new
-          one to continue working.
+          This chat may have been deleted or doesn&apos;t exist. Start a new one
+          to continue working.
         </p>
       </div>
       <Button onClick={handleCreateChat}>

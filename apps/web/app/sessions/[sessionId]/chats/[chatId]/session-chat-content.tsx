@@ -91,7 +91,6 @@ import {
   isChatInFlight as isChatInFlightStatus,
   isGitDataPart,
   shouldKeepCollapsedReasoningStreaming,
-  shouldRenderGitDataPart,
   shouldShowThinkingIndicator,
 } from "@/lib/chat-streaming-state";
 import { ACCEPT_IMAGE_TYPES, isValidImageType } from "@/lib/image-utils";
@@ -221,7 +220,7 @@ function getReasoningGroupText(parts: ReasoningMessagePart[]): string {
     .join("\n\n");
 }
 
-function GitDataPartCard({
+function _GitDataPartCard({
   part,
 }: {
   part: WebAgentCommitDataPart | WebAgentPrDataPart;
@@ -853,7 +852,7 @@ export function SessionChatContent({
   const [input, setInput] = useState("");
   const [isCreatingSandbox, setIsCreatingSandbox] = useState(false);
   const [isRestoringSnapshot, setIsRestoringSnapshot] = useState(false);
-  const [isUnarchiving, setIsUnarchiving] = useState(false);
+  const [_isUnarchiving, _setIsUnarchiving] = useState(false);
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [repoDialogOpen, setRepoDialogOpen] = useState(false);
@@ -871,7 +870,8 @@ export function SessionChatContent({
   const [branchPreviewUrlChangeBaseline, setBranchPreviewUrlChangeBaseline] =
     useState<string | null | undefined>(undefined);
   const hasMounted = useHasMounted();
-  const { activeView, shareRequested, setShareRequested, panelPortalRef } = useGitPanel();
+  const { activeView, shareRequested, setShareRequested, panelPortalRef } =
+    useGitPanel();
   const { preferences } = useUserPreferences();
   const isIosDevice = useMemo(() => {
     if (typeof navigator === "undefined") {
@@ -990,7 +990,7 @@ export function SessionChatContent({
     chatInfo,
     setSandboxInfo,
     archiveSession,
-    unarchiveSession,
+    unarchiveSession: _unarchiveSession,
     updateChatModel,
     updateSessionTitle,
     preferredSandboxType,
@@ -1082,7 +1082,7 @@ export function SessionChatContent({
     clearChatTitle,
     refreshChats,
   } = useSessionChats(session.id);
-  const upsertSyntheticAssistantGitMessage = useCallback(
+  const _upsertSyntheticAssistantGitMessage = useCallback(
     async (message: WebAgentUIMessage) => {
       setMessages((currentMessages) => {
         const existingIndex = currentMessages.findIndex(
@@ -1212,8 +1212,8 @@ export function SessionChatContent({
     : hasPendingResponse
       ? "streaming"
       : status;
-  const isChatReady = effectiveStatus === "ready";
-  const isFinalizingGitActions = gitFinalizationState.isFinalizing;
+  const _isChatReady = effectiveStatus === "ready";
+  const _isFinalizingGitActions = gitFinalizationState.isFinalizing;
   const showThinkingIndicator = useMemo(() => {
     // During the optimistic pending phase (user just clicked send but the
     // AI SDK status hasn't caught up yet due to throttling), always show
@@ -2389,7 +2389,7 @@ export function SessionChatContent({
     lifecycleTiming.state === "provisioning";
   const isSandboxActive = isSandboxValid(sandboxInfo) && serverSaysActive;
 
-  const sandboxUiStatus = useMemo(() => {
+  const _sandboxUiStatus = useMemo(() => {
     if (isArchived) {
       return { label: "Archived", className: "bg-muted text-muted-foreground" };
     }
@@ -2562,9 +2562,9 @@ export function SessionChatContent({
     hasRepo &&
     (hasUncommittedGitChanges || (hasExistingPr && hasUnpushedCommits));
   const hasOpenPr = hasExistingPr && session.prStatus === "open";
-  const canMergeAndArchive = hasOpenPr && !showCommitAction && !isArchived;
-  const canCloseAndArchive = hasOpenPr && !isArchived;
-  const openExistingPr = () => {
+  const _canMergeAndArchive = hasOpenPr && !showCommitAction && !isArchived;
+  const _canCloseAndArchive = hasOpenPr && !isArchived;
+  const _openExistingPr = () => {
     if (!existingPrUrl) {
       return;
     }
@@ -2679,9 +2679,7 @@ export function SessionChatContent({
       hasExistingPr={hasExistingPr}
       existingPrUrl={existingPrUrl}
       hasUncommittedGitChanges={hasUncommittedGitChanges}
-
       supportsRepoCreation={supportsRepoCreation}
-      supportsDiff={supportsDiff}
       hasDiff={Boolean(diff || session.cachedDiff)}
       prDeploymentUrl={prDeploymentUrl}
       isDeploymentStale={isDeploymentStale}
@@ -2697,20 +2695,16 @@ export function SessionChatContent({
           ? openBuildingDeployment
           : openPreviewOrPr
       }
-      onOpenPr={openExistingPr}
       onOpenBuildingDeployment={openBuildingDeployment}
       onMerged={handleMerged}
       onFixChecks={async (failedRuns) => {
         let text = "";
         try {
-          const res = await fetch(
-            `/api/sessions/${session.id}/checks/fix`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ checkRuns: failedRuns }),
-            },
-          );
+          const res = await fetch(`/api/sessions/${session.id}/checks/fix`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ checkRuns: failedRuns }),
+          });
           if (res.ok) {
             const data = (await res.json()) as { message: string };
             text = data.message;
@@ -2739,54 +2733,54 @@ export function SessionChatContent({
 
   return (
     <>
-    {/* Git panel portaled to layout-level for full page height */}
-    {panelPortalRef.current && createPortal(gitPanelElement, panelPortalRef.current)}
-    <div className="flex h-full flex-col overflow-hidden">
+      {/* Git panel portaled to layout-level for full page height */}
+      {panelPortalRef.current &&
+        createPortal(gitPanelElement, panelPortalRef.current)}
+      <div className="flex h-full flex-col overflow-hidden">
+        {/* Share dialog (triggered from header) */}
+        <ShareDialog
+          sessionId={session.id}
+          chatId={chatInfo.id}
+          initialShareId={null}
+          externalOpen={mobileShareOpen || shareRequested}
+          onExternalOpenChange={(open) => {
+            setMobileShareOpen(open);
+            if (!open) setShareRequested(false);
+          }}
+        />
 
-      {/* Share dialog (triggered from header) */}
-      <ShareDialog
-        sessionId={session.id}
-        chatId={chatInfo.id}
-        initialShareId={null}
-        externalOpen={mobileShareOpen || shareRequested}
-        onExternalOpenChange={(open) => {
-          setMobileShareOpen(open);
-          if (!open) setShareRequested(false);
-        }}
-      />
-
-      {/* Archive confirmation dialog */}
-      <Dialog
-        open={mobileArchiveDialogOpen}
-        onOpenChange={setMobileArchiveDialogOpen}
-      >
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Archive session?</DialogTitle>
-            <DialogDescription>
-              This will stop the sandbox and archive the session. You can still
-              view it in the archive tab.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <DialogClose asChild>
-              <Button
-                onClick={() => {
-                  void archiveSession().catch((error: unknown) => {
-                    console.error("Failed to archive session:", error);
-                  });
-                  router.push("/sessions");
-                }}
-              >
-                Archive
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Archive confirmation dialog */}
+        <Dialog
+          open={mobileArchiveDialogOpen}
+          onOpenChange={setMobileArchiveDialogOpen}
+        >
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Archive session?</DialogTitle>
+              <DialogDescription>
+                This will stop the sandbox and archive the session. You can
+                still view it in the archive tab.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button
+                  onClick={() => {
+                    void archiveSession().catch((error: unknown) => {
+                      console.error("Failed to archive session:", error);
+                    });
+                    router.push("/sessions");
+                  }}
+                >
+                  Archive
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Main content: chat or diff */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -3671,8 +3665,7 @@ export function SessionChatContent({
             </>
           )}
         </div>
-    </div>
-
+      </div>
 
       {/* Merge PR Dialog */}
       {session && (
@@ -3723,7 +3716,6 @@ export function SessionChatContent({
           onClosed={handleClosed}
         />
       )}
-
 
       {/* Create Repo Dialog */}
       {session && (

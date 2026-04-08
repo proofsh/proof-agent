@@ -138,7 +138,7 @@ export function DiffTabView() {
     );
   }
 
-  const fileName = file ? file.path.split("/").pop() ?? file.path : "";
+  const fileName = file ? (file.path.split("/").pop() ?? file.path) : "";
 
   return (
     <div className="flex h-full flex-col">
@@ -177,7 +177,10 @@ export function DiffTabView() {
                 className="h-7 w-7 px-0"
               >
                 <RefreshCw
-                  className={cn("h-3.5 w-3.5", diffRefreshing && "animate-spin")}
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    diffRefreshing && "animate-spin",
+                  )}
                 />
               </Button>
             </TooltipTrigger>

@@ -88,7 +88,16 @@ export function GitPanelProvider({ children }: { children: ReactNode }) {
       setShareRequested,
       panelPortalRef,
     }),
-    [gitPanelOpen, toggleGitPanel, gitPanelTab, activeView, changesTabDismissed, focusedDiffFile, openDiffToFile, shareRequested],
+    [
+      gitPanelOpen,
+      toggleGitPanel,
+      gitPanelTab,
+      activeView,
+      changesTabDismissed,
+      focusedDiffFile,
+      openDiffToFile,
+      shareRequested,
+    ],
   );
 
   return (

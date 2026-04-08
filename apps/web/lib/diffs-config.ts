@@ -98,7 +98,9 @@ function renderCustomSeparator(
     label.textContent = labelText;
 
     button.append(icon, label);
-    button.onclick = () => instance.expandHunk(hunkData.hunkIndex, direction);
+    button.addEventListener("click", () =>
+      instance.expandHunk(hunkData.hunkIndex, direction),
+    );
     return button;
   }
 
@@ -131,10 +133,8 @@ export const defaultDiffOptions: FileDiffOptions<undefined> = {
   overflow: "scroll",
   disableFileHeader: true,
   unsafeCSS,
-  hunkSeparators: (
-    hunkData: HunkData,
-    instance: FileDiff<undefined>,
-  ) => renderCustomSeparator(hunkData, instance),
+  hunkSeparators: (hunkData: HunkData, instance: FileDiff<undefined>) =>
+    renderCustomSeparator(hunkData, instance),
 };
 
 export const splitDiffOptions: FileDiffOptions<undefined> = {

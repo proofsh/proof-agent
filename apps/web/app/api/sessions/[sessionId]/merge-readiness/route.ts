@@ -35,6 +35,8 @@ export type MergeReadinessResponse = {
   pr: {
     number: number;
     repo: string;
+    title: string | null;
+    body: string | null;
     baseBranch: string | null;
     headBranch: string | null;
     headSha: string | null;
@@ -58,6 +60,8 @@ function buildUnavailableResponse(
         ? {
             number: prNumber,
             repo,
+            title: null,
+            body: null,
             baseBranch: null,
             headBranch: null,
             headSha: null,
@@ -175,6 +179,8 @@ export async function GET(_req: Request, context: RouteContext) {
     pr: {
       number: sessionRecord.prNumber,
       repo: repoIdentifier,
+      title: readiness.pr?.title ?? null,
+      body: readiness.pr?.body ?? null,
       baseBranch: readiness.pr?.baseBranch ?? null,
       headBranch: readiness.pr?.headBranch ?? null,
       headSha: readiness.pr?.headSha ?? null,

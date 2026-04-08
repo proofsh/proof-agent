@@ -80,7 +80,6 @@ type GitPanelProps = {
   existingPrUrl: string | null;
   hasUncommittedGitChanges: boolean;
   supportsRepoCreation: boolean;
-  supportsDiff: boolean;
   hasDiff: boolean;
 
   // Preview/deployment
@@ -103,7 +102,6 @@ type GitPanelProps = {
   // Actions
   onCreateRepoClick: () => void;
   onOpenPreview: () => void;
-  onOpenPr: () => void;
   onOpenBuildingDeployment: () => void;
 
   // Merge
@@ -236,48 +234,48 @@ function DiffFileList({ files }: { files: DiffFile[] }) {
           </button>
         </div>
       )}
-    <div className="space-y-px">
-      {filteredFiles.map((file) => {
-        const fileName = file.path.split("/").pop() ?? file.path;
-        const dirPath = file.path.slice(0, -fileName.length);
+      <div className="space-y-px">
+        {filteredFiles.map((file) => {
+          const fileName = file.path.split("/").pop() ?? file.path;
+          const dirPath = file.path.slice(0, -fileName.length);
 
-        return (
-          <button
-            key={file.path}
-            type="button"
-            onClick={() => openDiffToFile(file.path)}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent"
-          >
-            <DiffFileStatusIcon status={file.status} />
-            <div className="flex min-w-0 flex-1 items-baseline gap-1.5 overflow-hidden">
-              <span className="shrink-0 text-xs font-medium text-foreground font-mono">
-                {fileName}
-              </span>
-              {dirPath && (
-                <span
-                  className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-muted-foreground"
-                  dir="rtl"
-                >
-                  <bdi>{dirPath.replace(/\/$/, "")}</bdi>
+          return (
+            <button
+              key={file.path}
+              type="button"
+              onClick={() => openDiffToFile(file.path)}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent"
+            >
+              <DiffFileStatusIcon status={file.status} />
+              <div className="flex min-w-0 flex-1 items-baseline gap-1.5 overflow-hidden">
+                <span className="shrink-0 text-xs font-medium text-foreground font-mono">
+                  {fileName}
                 </span>
-              )}
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5 text-[10px]">
-              {file.additions > 0 && (
-                <span className="text-green-600 dark:text-green-500">
-                  +{file.additions}
-                </span>
-              )}
-              {file.deletions > 0 && (
-                <span className="text-red-600 dark:text-red-400">
-                  -{file.deletions}
-                </span>
-              )}
-            </div>
-          </button>
-        );
-      })}
-    </div>
+                {dirPath && (
+                  <span
+                    className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-muted-foreground"
+                    dir="rtl"
+                  >
+                    <bdi>{dirPath.replace(/\/$/, "")}</bdi>
+                  </span>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-1.5 text-[10px]">
+                {file.additions > 0 && (
+                  <span className="text-green-600 dark:text-green-500">
+                    +{file.additions}
+                  </span>
+                )}
+                {file.deletions > 0 && (
+                  <span className="text-red-600 dark:text-red-400">
+                    -{file.deletions}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -557,14 +555,6 @@ function InlinePrCreatePanel({
   const isDetachedHead = gitStatus?.isDetachedHead ?? false;
   const needsNewBranch = displayBranch === baseBranch || isDetachedHead;
 
-  const normalizedRepoOwner = session.repoOwner?.toLowerCase() ?? null;
-  const normalizedHeadOwner = prHeadOwner?.toLowerCase() ?? null;
-  const shouldOpenCompareInsteadOfApi = Boolean(
-    normalizedRepoOwner &&
-      normalizedHeadOwner &&
-      normalizedHeadOwner !== normalizedRepoOwner,
-  );
-
   // Fetch branches on mount
   useEffect(() => {
     if (!session.repoOwner || !session.repoName) return;
@@ -646,7 +636,10 @@ function InlinePrCreatePanel({
         if (finalTitle) compareUrl.searchParams.set("title", finalTitle);
         if (finalBody) compareUrl.searchParams.set("body", finalBody);
         window.open(compareUrl.toString(), "_blank", "noopener,noreferrer");
-        setPrSuccess({ prUrl: compareUrl.toString(), requiresManualCreation: true });
+        setPrSuccess({
+          prUrl: compareUrl.toString(),
+          requiresManualCreation: true,
+        });
         return;
       }
 
@@ -905,11 +898,6 @@ function InlineMergePanel({
   }, []);
 
   const canMerge = readiness?.canMerge ?? false;
-  const pullRequestUrl = readiness?.pr
-    ? `https://github.com/${readiness.pr.repo}/pull/${readiness.pr.number}`
-    : session.repoOwner && session.repoName && session.prNumber
-      ? `https://github.com/${session.repoOwner}/${session.repoName}/pull/${session.prNumber}`
-      : null;
 
   const handleMerge = async (force = false) => {
     if (!readiness?.pr) {
@@ -1000,8 +988,25 @@ function InlineMergePanel({
   const mergeDisabled =
     isSubmitting || isLoadingReadiness || !readiness || !readiness.pr;
 
+  const prTitle = readiness?.pr?.title ?? null;
+  const prBody = readiness?.pr?.body ?? null;
+
   return (
     <div className="space-y-3">
+      {/* PR title & description */}
+      {prTitle && (
+        <div className="space-y-1.5">
+          <p className="text-sm font-medium text-foreground leading-snug">
+            {prTitle}
+          </p>
+          {prBody && (
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4 whitespace-pre-line">
+              {prBody}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Check runs */}
       <CheckRunsList
         checkRuns={readiness?.checkRuns ?? []}
@@ -1155,7 +1160,6 @@ export function GitPanel(props: GitPanelProps) {
     existingPrUrl,
     hasUncommittedGitChanges,
     supportsRepoCreation,
-    supportsDiff,
     hasDiff,
     prDeploymentUrl,
     isDeploymentStale,
@@ -1167,7 +1171,6 @@ export function GitPanel(props: GitPanelProps) {
     diffSummary,
     onCreateRepoClick,
     onOpenPreview,
-    onOpenPr,
     onOpenBuildingDeployment,
     onMerged,
     onFixChecks,
@@ -1199,8 +1202,7 @@ export function GitPanel(props: GitPanelProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
             >
-              <GitPullRequest className="h-3.5 w-3.5" />
-              #{session.prNumber}
+              <GitPullRequest className="h-3.5 w-3.5" />#{session.prNumber}
               <ExternalLink className="h-3 w-3 text-muted-foreground" />
             </a>
           ) : hasRepo && session.branch ? (
@@ -1228,13 +1230,11 @@ export function GitPanel(props: GitPanelProps) {
 
       {/* Tab bar — matches chat tabs sub-header height */}
       <div className="flex items-center gap-0.5 border-b border-border bg-muted/30 px-2 py-[7px]">
-        {(
-          [
-            "code" as const,
-            "diff" as const,
-            ...(showGitTab ? (["pr"] as const) : []),
-          ]
-        ).map((tab) => (
+        {[
+          "code" as const,
+          "diff" as const,
+          ...(showGitTab ? (["pr"] as const) : []),
+        ].map((tab) => (
           <button
             key={tab}
             type="button"
@@ -1246,11 +1246,7 @@ export function GitPanel(props: GitPanelProps) {
                 : "text-muted-foreground hover:bg-muted/50",
             )}
           >
-            {tab === "code"
-              ? "Code"
-              : tab === "diff"
-                ? "Changes"
-                : "PR"}
+            {tab === "code" ? "Code" : tab === "diff" ? "Changes" : "PR"}
             {tab === "diff" && hasDiffChanges && (
               <span className="ml-1 text-[10px] text-muted-foreground font-mono">
                 {diffFiles?.length ?? 0}
@@ -1354,11 +1350,9 @@ export function GitPanel(props: GitPanelProps) {
             )}
 
             {/* Separator */}
-            {hasRepo &&
-              diffFiles &&
-              diffFiles.length > 0 && (
-                <div className="mb-2 border-t border-border" />
-              )}
+            {hasRepo && diffFiles && diffFiles.length > 0 && (
+              <div className="mb-2 border-t border-border" />
+            )}
 
             {diffFiles && diffFiles.length > 0 ? (
               <>

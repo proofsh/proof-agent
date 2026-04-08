@@ -37,6 +37,8 @@ export type PullRequestMergeReadiness = {
     number: number;
     state: "open" | "closed";
     isDraft: boolean;
+    title: string;
+    body: string | null;
     baseBranch: string;
     headBranch: string;
     headSha: string;
@@ -645,6 +647,8 @@ export async function getPullRequestMergeReadiness(params: {
         number: pullRequest.number,
         state: pullRequest.state,
         isDraft,
+        title: pullRequest.title,
+        body: pullRequest.body,
         baseBranch: pullRequest.base.ref,
         headBranch: pullRequest.head.ref,
         headSha: pullRequest.head.sha,

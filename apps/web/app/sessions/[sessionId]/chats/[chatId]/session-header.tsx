@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ExternalLink,
-  Link2,
-  PanelLeft,
-  PanelRight,
-} from "lucide-react";
+import { ExternalLink, Link2, PanelLeft, PanelRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

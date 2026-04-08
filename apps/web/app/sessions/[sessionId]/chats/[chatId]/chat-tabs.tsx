@@ -24,12 +24,16 @@ type ChatTabsProps = {
   activeChatId: string;
 };
 
-export function ChatTabs({
-  activeChatId,
-}: ChatTabsProps) {
+export function ChatTabs({ activeChatId }: ChatTabsProps) {
   const { chats, createChat, switchChat, deleteChat, renameChat } =
     useSessionLayout();
-  const { activeView, setActiveView, setFocusedDiffFile, changesTabDismissed, setChangesTabDismissed } = useGitPanel();
+  const {
+    activeView,
+    setActiveView,
+    setFocusedDiffFile,
+    changesTabDismissed,
+    setChangesTabDismissed,
+  } = useGitPanel();
 
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -95,8 +99,7 @@ export function ChatTabs({
       <div className="flex items-center gap-0 border-b border-border bg-muted/30 px-1">
         <div className="flex min-w-0 flex-1 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {chats.map((chat) => {
-            const isActive =
-              chat.id === activeChatId && activeView === "chat";
+            const isActive = chat.id === activeChatId && activeView === "chat";
             const isRenaming = renamingChatId === chat.id;
 
             return (
@@ -194,19 +197,13 @@ export function ChatTabs({
               <GitCompare className="h-3.5 w-3.5" />
               <span>Changes</span>
               {/* Close button */}
-              <span
-                role="button"
-                tabIndex={0}
+              <button
+                type="button"
                 onClick={handleCloseChanges}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleCloseChanges(e as unknown as React.MouseEvent);
-                  }
-                }}
                 className="ml-0.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
-              </span>
+              </button>
             </button>
           )}
 
@@ -242,10 +239,7 @@ export function ChatTabs({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeletingChatId(null)}
-            >
+            <Button variant="outline" onClick={() => setDeletingChatId(null)}>
               Cancel
             </Button>
             <Button

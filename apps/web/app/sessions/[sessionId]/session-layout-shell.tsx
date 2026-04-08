@@ -8,7 +8,10 @@ import {
   useSessionChats,
 } from "@/hooks/use-session-chats";
 import type { Session } from "@/lib/db/schema";
-import { GitPanelProvider, useGitPanel } from "./chats/[chatId]/git-panel-context";
+import {
+  GitPanelProvider,
+  useGitPanel,
+} from "./chats/[chatId]/git-panel-context";
 import { SessionHeader } from "./chats/[chatId]/session-header";
 import { ChatTabs } from "./chats/[chatId]/chat-tabs";
 import { SessionLayoutContext } from "./session-layout-context";
@@ -40,12 +43,8 @@ function SessionLayoutInner({
       {/* Left column: header + tabs + page content */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <SessionHeader />
-        {activeChatId && (
-          <ChatTabs activeChatId={activeChatId} />
-        )}
-        <div className="min-h-0 flex-1 overflow-hidden">
-          {children}
-        </div>
+        {activeChatId && <ChatTabs activeChatId={activeChatId} />}
+        <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
       </div>
 
       {/* Portal target for the git panel — full page height */}
@@ -100,7 +99,15 @@ export function SessionLayoutShell({
       deleteChat,
       renameChat,
     }),
-    [initialSession, chats, chatsLoading, createChat, switchChat, deleteChat, renameChat],
+    [
+      initialSession,
+      chats,
+      chatsLoading,
+      createChat,
+      switchChat,
+      deleteChat,
+      renameChat,
+    ],
   );
 
   return (
