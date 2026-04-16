@@ -38,8 +38,7 @@ const CODE_SERVER_PIDFILE = "/tmp/open-harness-code-server.pid";
 type ConnectedSandbox = Awaited<ReturnType<typeof connectSandbox>>;
 
 function toSandboxErrorResponse(error: unknown, fallbackMessage: string) {
-  const message =
-    error instanceof Error ? error.message : String(error);
+  const message = error instanceof Error ? error.message : String(error);
   if (isSandboxUnavailableError(message)) {
     return Response.json(
       { error: "Sandbox is no longer reachable. Resume it and try again." },
@@ -48,7 +47,10 @@ function toSandboxErrorResponse(error: unknown, fallbackMessage: string) {
   }
 
   console.error(`${fallbackMessage}:`, error);
-  return Response.json({ error: `${fallbackMessage}: ${message}` }, { status: 500 });
+  return Response.json(
+    { error: `${fallbackMessage}: ${message}` },
+    { status: 500 },
+  );
 }
 
 function shellQuote(value: string): string {

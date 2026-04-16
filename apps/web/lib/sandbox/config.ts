@@ -43,7 +43,7 @@ export const DEFAULT_WORKING_DIRECTORY = "/vercel/sandbox";
  */
 export const DEFAULT_SANDBOX_BASE_SNAPSHOT_ID =
   process.env.VERCEL_SANDBOX_BASE_SNAPSHOT_ID || undefined;
-  // Previous snapshots (all expired):
-  // "snap_MQ0NqdLL5qEXiYusgWL3K0yaMmql" (bun + jq)
-  // "snap_C8tUFhwRXZky4MaFvTuwO7DH66wx" (bun + jq + agent-browser + chromium)
-  // "snap_EjsphVxi07bFKrfojljJdIS41KHT" (bun + jq + agent-browser + chromium + code-server)
+// Previous snapshots (all expired):
+// "snap_MQ0NqdLL5qEXiYusgWL3K0yaMmql" (bun + jq)
+// "snap_C8tUFhwRXZky4MaFvTuwO7DH66wx" (bun + jq + agent-browser + chromium)
+// "snap_EjsphVxi07bFKrfojljJdIS41KHT" (bun + jq + agent-browser + chromium + code-server)
