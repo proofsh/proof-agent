@@ -4,7 +4,10 @@ import {
   requireOwnedSessionWithSandboxGuard,
 } from "@/app/api/sessions/_lib/session-context";
 import { CODE_SERVER_PORT, DEFAULT_SANDBOX_PORTS } from "@/lib/sandbox/config";
-import { isSandboxActive } from "@/lib/sandbox/utils";
+import {
+  isSandboxActive,
+  isSandboxUnavailableError,
+} from "@/lib/sandbox/utils";
 
 type RouteContext = {
   params: Promise<{ sessionId: string }>;
@@ -28,6 +31,20 @@ export type CodeEditorStopResponse = {
 const CODE_SERVER_PIDFILE = "/tmp/open-harness-code-server.pid";
 
 type ConnectedSandbox = Awaited<ReturnType<typeof connectSandbox>>;
+
+function toSandboxErrorResponse(error: unknown, fallbackMessage: string) {
+  const message =
+    error instanceof Error ? error.message : String(error);
+  if (isSandboxUnavailableError(message)) {
+    return Response.json(
+      { error: "Sandbox is no longer reachable. Resume it and try again." },
+      { status: 409 },
+    );
+  }
+
+  console.error(`${fallbackMessage}:`, error);
+  return Response.json({ error: `${fallbackMessage}: ${message}` }, { status: 500 });
+}
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
@@ -224,11 +241,7 @@ export async function GET(_req: Request, context: RouteContext) {
       port,
     } satisfies CodeEditorStatusResponse);
   } catch (error) {
-    console.error("Failed to check code editor status:", error);
-    return Response.json(
-      { error: "Failed to check code editor status" },
-      { status: 500 },
-    );
+    return toSandboxErrorResponse(error, "Failed to check code editor status");
   }
 }
 
@@ -306,11 +319,7 @@ export async function POST(_req: Request, context: RouteContext) {
       port,
     } satisfies CodeEditorLaunchResponse);
   } catch (error) {
-    console.error("Failed to launch code editor:", error);
-    return Response.json(
-      { error: "Failed to launch code editor" },
-      { status: 500 },
-    );
+    return toSandboxErrorResponse(error, "Failed to launch code editor");
   }
 }
 
@@ -335,10 +344,6 @@ export async function DELETE(_req: Request, context: RouteContext) {
 
     return Response.json({ stopped } satisfies CodeEditorStopResponse);
   } catch (error) {
-    console.error("Failed to stop code editor:", error);
-    return Response.json(
-      { error: "Failed to stop code editor" },
-      { status: 500 },
-    );
+    return toSandboxErrorResponse(error, "Failed to stop code editor");
   }
 }
