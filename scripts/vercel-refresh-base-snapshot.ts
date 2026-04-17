@@ -140,6 +140,20 @@ async function main() {
     log: (message) => console.log(message),
   });
 
+  for (const commandResult of result.commandResults) {
+    console.log("");
+    console.log(`$ ${commandResult.command}`);
+    if (commandResult.stdout.trim().length > 0) {
+      console.log(commandResult.stdout.trimEnd());
+    }
+    if (commandResult.stderr.trim().length > 0) {
+      console.log(`stderr:\n${commandResult.stderr.trimEnd()}`);
+    }
+    if (commandResult.truncated) {
+      console.log("(output truncated)");
+    }
+  }
+
   console.log("");
   console.log(`New snapshot id: ${result.snapshotId}`);
   console.log(`Started from snapshot: ${result.sourceSnapshotId}`);

@@ -38,8 +38,18 @@ export const DEFAULT_WORKING_DIRECTORY = "/vercel/sandbox";
 
 /**
  * Base snapshot for fresh cloud sandboxes.
- * - Current snapshot includes: bun + jq + agent-browser + chromium + code-server
- * - Previous snapshot includes: bun + jq + agent-browser + chromium
+ *
+ * Current snapshot (`snap_X75n0Hxm0U5dSuwxfx0ayW90UAxm`, AL2023 x86_64) includes:
+ * - Core: bun, jq, tree, python3 + pip
+ * - Build toolchain: gcc, gcc-c++, make (for native npm modules)
+ * - Search/find: ripgrep, fd
+ * - Data tooling: yq, postgresql15 client (psql)
+ * - Media: ffmpeg, ffprobe (for agent-browser video recording)
+ * - Browser automation: agent-browser + Chrome for Testing (with GTK/X11/NSS runtime libs)
+ * - In-browser editor: code-server (served on port 8000)
+ *
+ * Rebuild with `bun run sandbox:snapshot-base -- --command "..."` and update
+ * `VERCEL_SANDBOX_BASE_SNAPSHOT_ID` in the Vercel project env.
  */
 export const DEFAULT_SANDBOX_BASE_SNAPSHOT_ID =
   process.env.VERCEL_SANDBOX_BASE_SNAPSHOT_ID || undefined;
