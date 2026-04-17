@@ -15,6 +15,8 @@ Hard-won knowledge from building this codebase. When you make a mistake or disco
 - After schema edits, review generated Drizzle migrations for unrelated schema drift changes before committing (for example defaults on untouched columns), since `drizzle-kit generate` can include those alongside intended changes.
 - `bunx @vercel/config validate` executes the CLI under Node via its shebang and cannot parse TypeScript-style `vercel.ts` imports; use `bunx --bun @vercel/config validate` (or `bun node_modules/@vercel/config/dist/cli.js validate`) for reliable local validation.
 - Successful Vercel CLI auth (`vercel whoami`, team/project REST APIs, `.vercel` linking) does **not** guarantee Workflow observability access. `workflow inspect ... --backend vercel` can still fail with `401 {"error":{"code":"unauthorized","message":"You are not allowed to access this endpoint."}}` when the user/token lacks the Vercel product permission documented as `Vercel Workflow` (and possibly related Observability access), even if `WORKFLOW_VERCEL_AUTH_TOKEN` is passed explicitly from the Vercel CLI auth file.
+- Never pipe `echo value | vercel env add NAME <env>`; `echo` appends a newline that Vercel stores as part of the value, and callers like the `@vercel/sandbox` SDK then 404 on lookups (e.g. snapshot ID). Use `printf '%s' value | vercel env add ...` (or the interactive prompt), and verify via `vercel env pull` + `od -c` that the dotenv line ends with `"\n` only after the closing quote.
+- Vercel env var changes do not apply to the currently running deployment; they only take effect on the next build. After `vercel env add/rm`, trigger `vercel redeploy <url> --target production` (or push a new commit) before expecting runtime code to see the new value.
 
 ## Next.js
 
